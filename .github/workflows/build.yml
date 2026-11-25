@@ -1,0 +1,57 @@
+name: EXE·DMG 만들기
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['index.html', 'main.js', 'package.json', '.github/workflows/build.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            cmd: dist:win
+            files: dist/*.exe
+            name: windows-exe
+          - os: macos-latest
+            cmd: dist:mac
+            files: dist/*.dmg
+            name: mac-dmg
+    runs-on: ${{ matrix.os }}
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install
+      - run: npm run ${{ matrix.cmd }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.name }}
+          path: ${{ matrix.files }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: out
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: 버스좌석배치 (빌드 ${{ github.run_number }})
+          body: |
+            - 윈도우: BusSeats-*-win-x64.exe (설치용) 또는 BusSeats-*-portable.exe (설치 없이 실행)
+            - 맥: BusSeats-*-mac-universal.dmg (인텔·M칩 맥 모두)
+            서명되지 않은 앱이라 처음 실행할 때 경고가 떠요. README의 "처음 실행할 때"를 참고하세요.
+          files: out/**/*
+          make_latest: true
