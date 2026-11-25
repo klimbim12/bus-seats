@@ -1,0 +1,35 @@
+{
+  "name": "bus-seats",
+  "productName": "BusSeats",
+  "version": "1.2.0",
+  "description": "현장체험학습 버스 좌석 배치",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist:win": "electron-builder --win --publish never",
+    "dist:mac": "electron-builder --mac --publish never"
+  },
+  "devDependencies": {
+    "electron": "33.2.1",
+    "electron-builder": "25.1.8"
+  },
+  "build": {
+    "appId": "kr.school.busseats",
+    "productName": "BusSeats",
+    "artifactName": "BusSeats-${version}-${os}-${arch}.${ext}",
+    "files": ["main.js", "index.html"],
+    "win": {
+      "target": [
+        { "target": "nsis", "arch": ["x64"] },
+        { "target": "portable", "arch": ["x64"] }
+      ]
+    },
+    "portable": { "artifactName": "BusSeats-${version}-portable.exe" },
+    "nsis": { "oneClick": false, "allowToChangeInstallationDirectory": true, "createDesktopShortcut": true },
+    "mac": {
+      "target": [{ "target": "dmg", "arch": ["universal"] }],
+      "category": "public.app-category.education",
+      "identity": null
+    }
+  }
+}
